@@ -5,75 +5,74 @@ import (
 	"log"
 	"net/http"
 	"system_monitor/internal/monitor"
-	"text/template"
+	"time"
+
+	"github.com/DataDog/gopsutil/disk"
+	"github.com/gorilla/websocket"
 )
 
+type WSResponse struct {
+	HOST monitor.HostInfo
+	CPU  []monitor.CpuInfo
+	MEM  monitor.MemInfo
+	Disk disk.UsageStat
+}
+
 func HandleServer() {
-	todoHandler := func(res http.ResponseWriter, req *http.Request) {
-		templ := template.Must(template.ParseFiles("htmx/index.html"))
-		templ.Execute(res, nil)
+	var upgrader = websocket.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+		CheckOrigin: func(r *http.Request) bool {
+			return true
+		},
 	}
 
-	http.HandleFunc("/", todoHandler)
-	http.HandleFunc("/ram", func(w http.ResponseWriter, r *http.Request) {
-		ramInfo, err := monitor.GetRamInfo()
+	fs := http.FileServer(http.Dir("./static"))
+	http.Handle("/", fs)
+
+	http.HandleFunc("/stats", func(w http.ResponseWriter, r *http.Request) {
+		conn, err := upgrader.Upgrade(w, r, nil)
 		if err != nil {
-			http.Error(w, "Failed to get RAM info", http.StatusInternalServerError)
+			fmt.Println("Failed to upgrade connetion")
 			return
 		}
 
-		ramTmpl := template.Must(template.New("ram").Parse(`
-			<div hx-get="/ram" hx-trigger="every 2s" hx-swap="outerHTML">
-			<ul>
-				<li><strong>RAM Free:</strong> <span>{{.Free}} MB</span></li>
-				<li><strong>RAM Used:</strong> <span>{{.Used}} MB</span></li>
-				<li><strong>RAM Total:</strong> <span>{{.Total}} MB</span></li>
-				<li><strong>RAM Usage:</strong> <span>{{.Percentage}}%</span></li>
-			</ul>
-			</div>
-		`))
+		defer conn.Close()
 
-		ramTmpl.Execute(w, ramInfo)
-	})
-	http.HandleFunc("/cpu", func(w http.ResponseWriter, r *http.Request) {
-		cpuInfo, err := monitor.GetCpuInfo()
-		if err != nil {
-			http.Error(w, "Failed to get RAM info", http.StatusInternalServerError)
-			return
-		}
-		cpuTmpl := template.Must(template.New("cpu").Parse(`
-		<div hx-get="/cpu" hx-trigger="every 2s" hx-swap="outerHTML">
-          {{range .}}
-        <div class="cpu-core">
-          <strong>Core:</strong> <span>{{.Core}}</span> — <strong></strong>
-          <span>{{.Model}}</span> — <strong>Usage:</strong>
-          <span style="margin-left: 50px">{{.Usage}}%</span>
-        </div>
-        {{end}}
-        </div>
-		`))
+		fmt.Println("Client Connected")
 
-		cpuTmpl.Execute(w, cpuInfo)
-	})
-	http.HandleFunc("/host", func(w http.ResponseWriter, r *http.Request) {
-		hostInfo, err := monitor.GetHostInfo()
-		if err != nil {
-			http.Error(w, "Failed to get RAM info", http.StatusInternalServerError)
-			return
+		for {
+			time.Sleep(time.Second)
+			ramInfo, err := monitor.GetRamInfo()
+			if err != nil {
+				http.Error(w, "Failed to get RAM info", http.StatusInternalServerError)
+				return
+			}
+			cpuInfo, err := monitor.GetCpuInfo()
+			if err != nil {
+				http.Error(w, "Failed to get RAM info", http.StatusInternalServerError)
+				return
+			}
+			hostInfo, err := monitor.GetHostInfo()
+			if err != nil {
+				http.Error(w, "Failed to get RAM info", http.StatusInternalServerError)
+				return
+			}
+			diskInfo, err := monitor.GetDiskInfo()
+			if err != nil {
+				http.Error(w, "Failed to get Disk info", http.StatusInternalServerError)
+				return
+			}
+			if err := conn.WriteJSON(WSResponse{
+				HOST: hostInfo,
+				CPU:  cpuInfo,
+				MEM:  ramInfo,
+				Disk: *diskInfo,
+			}); err != nil {
+				fmt.Println("Write error:", err)
+				break
+			}
 		}
-		hostTmpl := template.Must(template.New("host").Parse(`
-          	<div hx-get="/host" hx-trigger="every 2s" hx-swap="outerHTML">
-            	<ul>
-					<li><strong>Hostname:</strong> <span>{{.Host}}</span></li>
-					<li><strong>OS:</strong> <span>{{.Os}}</span></li>
-					<li>
-					<strong>Uptime:</strong>
-					<span data-uptime>{{.Uptime}} min</span>
-              		</li>
-            	</ul>
-          	</div>
-		`))
-		hostTmpl.Execute(w, hostInfo)
 	})
 
 	fmt.Println("Server Started on http://localhost:8080")
