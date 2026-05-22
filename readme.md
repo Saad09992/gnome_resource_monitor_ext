@@ -6,6 +6,11 @@
 <img width="2143" height="662" alt="image" src="https://github.com/user-attachments/assets/9f85af5c-9125-4e2d-85d7-af9cd1a2a5b6" />
 <img width="1853" height="793" alt="image" src="https://github.com/user-attachments/assets/9ebba08a-9c7d-40f9-951b-4c8804b7c7e5" />
 <img width="1528" height="1252" alt="image" src="https://github.com/user-attachments/assets/1c90b40e-87ef-4981-8d5a-23fcc6b169ad" />
+<img width="842" height="387" alt="image" src="https://github.com/user-attachments/assets/f9f2f765-341e-48ca-b64b-fcec07832aba" />
+
+
+10Mb ram usage
+<img width="1105" height="85" alt="image" src="https://github.com/user-attachments/assets/17d3c46b-da97-4665-83ce-48cf81011c2d" />
 
 
 ## How it works
