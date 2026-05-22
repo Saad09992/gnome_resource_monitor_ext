@@ -2,7 +2,11 @@
 
 ## This is a gnome extension that displays stats like CPU usage, RAM usage, DISK usage and Network I/O on the gnome top panel
 
-![alt text](image.png)
+<img width="1926" height="53" alt="image" src="https://github.com/user-attachments/assets/db13ea9a-aab6-4ada-a4f0-1abb14dc1eca" />
+<img width="2143" height="662" alt="image" src="https://github.com/user-attachments/assets/9f85af5c-9125-4e2d-85d7-af9cd1a2a5b6" />
+<img width="1853" height="793" alt="image" src="https://github.com/user-attachments/assets/9ebba08a-9c7d-40f9-951b-4c8804b7c7e5" />
+<img width="1528" height="1252" alt="image" src="https://github.com/user-attachments/assets/1c90b40e-87ef-4981-8d5a-23fcc6b169ad" />
+
 
 ## How it works
 
