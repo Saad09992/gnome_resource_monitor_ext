@@ -1,0 +1,8 @@
+{
+  "name": "Resource Monitor",
+  "description": "Displays CPU,RAM,DISK,NET usage stats in the top panel",
+  "uuid": "resource-monitor@saadofficial0999.com",
+  "shell-version": [
+    "50"
+  ]
+}

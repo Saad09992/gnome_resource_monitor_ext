@@ -291,6 +291,18 @@
             </li>
           </ul>
         </section>
+        <section class="network-info">
+          <h2>Network Information</h2>
+          <ul>
+            <li>
+              <strong>Send</strong><span class="value" id="net-send">-</span>
+            </li>
+            <li>
+              <strong>Receive</strong
+              ><span class="value" id="net-receive">-</span>
+            </li>
+          </ul>
+        </section>
       </div>
 
       <section class="cpu-info" id="cpu-info">
@@ -320,6 +332,7 @@
       updateMemoryInfo(data.MEM);
       updateCpuInfo(data.CPU);
       updateDiskInfo(data.DISK ?? data.Disk ?? data.disk ?? null);
+      updateNetInfo(data.Net ?? data.NET ?? data.net ?? null);
       setConnectionStatus("Live", true);
     };
 
@@ -401,7 +414,6 @@
           '<div class="disk-partition">No disk data available.</div>';
         return;
       }
-
       const part = document.createElement("div");
       part.classList.add("disk-partition");
       part.innerHTML = `
@@ -421,6 +433,25 @@
         </ul>
       `;
       container.appendChild(part);
+    }
+
+    function updateNetInfo(net) {
+      const sendEl = document.getElementById("net-send");
+      const recvEl = document.getElementById("net-receive");
+
+      if (!sendEl || !recvEl) return; // elements missing
+
+      if (!net) {
+        sendEl.textContent = "-";
+        recvEl.textContent = "-";
+        return;
+      }
+
+      const sendKb = Number(net?.SendSpeed ?? net?.sendSpeed ?? 0);
+      const recvKb = Number(net?.ReceiveSpeed ?? net?.receiveSpeed ?? 0);
+
+      sendEl.textContent = `${sendKb.toFixed(2)} KB/s`;
+      recvEl.textContent = `${recvKb.toFixed(2)} KB/s`;
     }
 
     function formatUptime(minutes) {

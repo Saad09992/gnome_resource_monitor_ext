@@ -1,0 +1,8 @@
+/* Resource Monitor panel label.
+ * monospace + tabular numbers ("tnum") keep each digit the same width, so the
+ * label doesn't visibly shift left/right as the numbers change every second. */
+.resmon-label {
+  font-family: monospace;
+  font-feature-settings: "tnum";
+  padding: 0 6px;
+}

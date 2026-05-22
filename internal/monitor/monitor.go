@@ -9,7 +9,11 @@ import (
 	"github.com/DataDog/gopsutil/disk"
 	"github.com/DataDog/gopsutil/host"
 	"github.com/DataDog/gopsutil/mem"
+	"github.com/DataDog/gopsutil/net"
 )
+
+var prevBytesSent uint64 = 0
+var prevBytesRecv uint64 = 0
 
 type HostInfo struct {
 	Host   string
@@ -31,7 +35,13 @@ type MemInfo struct {
 	Free       float64
 }
 
-const megabyte uint64 = 1024 * 1024
+type NetInfo struct {
+	SendSpeed    float64
+	ReceiveSpeed float64
+}
+
+const kilobyte uint64 = 1024
+const megabyte uint64 = kilobyte * 1024
 const gigabyte uint64 = megabyte * 1024
 
 func GetHostInfo() (HostInfo, error) {
@@ -97,4 +107,22 @@ func GetDiskInfo() (*disk.UsageStat, error) {
 	}
 
 	return info, nil
+}
+
+func GetNetInfo() (*NetInfo, error) {
+	var netInfo *NetInfo
+	info, err := net.IOCounters(false)
+	if err != nil {
+		fmt.Printf("Error fetching net info: %v", err)
+		return netInfo, err
+	}
+	sentSpeed := (info[0].BytesSent - prevBytesSent)
+	receiveSpeed := (info[0].BytesRecv - prevBytesRecv)
+	netInfo = &NetInfo{
+		SendSpeed:    math.Round((float64(sentSpeed)/float64(kilobyte))*100) / 100,
+		ReceiveSpeed: math.Round((float64(receiveSpeed)/float64(kilobyte))*100) / 100,
+	}
+	prevBytesSent = info[0].BytesSent
+	prevBytesRecv = info[0].BytesRecv
+	return netInfo, nil
 }

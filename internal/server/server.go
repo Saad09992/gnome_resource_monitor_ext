@@ -16,6 +16,7 @@ type WSResponse struct {
 	CPU  []monitor.CpuInfo
 	MEM  monitor.MemInfo
 	Disk disk.UsageStat
+	Net  monitor.NetInfo
 }
 
 func HandleServer() {
@@ -63,11 +64,17 @@ func HandleServer() {
 				http.Error(w, "Failed to get Disk info", http.StatusInternalServerError)
 				return
 			}
+			netInfo, err := monitor.GetNetInfo()
+			if err != nil {
+				http.Error(w, "Failed to get Net info", http.StatusInternalServerError)
+				return
+			}
 			if err := conn.WriteJSON(WSResponse{
 				HOST: hostInfo,
 				CPU:  cpuInfo,
 				MEM:  ramInfo,
 				Disk: *diskInfo,
+				Net:  *netInfo,
 			}); err != nil {
 				fmt.Println("Write error:", err)
 				break
